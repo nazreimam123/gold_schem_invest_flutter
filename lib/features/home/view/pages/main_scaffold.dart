@@ -171,7 +171,7 @@ class _MainScaffoldState extends State<MainScaffold>
   void _onItemTapped(int index) {
     if (index == 3) {
       // Open drawer when More is tapped
-      _scaffoldKey.currentState?.openDrawer();
+      _scaffoldKey.currentState?.openEndDrawer();
     } else {
       setState(() {
         _selectedIndex = index;
@@ -412,7 +412,7 @@ class _MainScaffoldState extends State<MainScaffold>
     return Scaffold(
       key: _scaffoldKey,
       body: IndexedStack(index: _selectedIndex, children: pages),
-      drawer: AppDrawerWidget(
+      endDrawer: AppDrawerWidget(
         onSelectPassbook: () => setCurrentIndex(1),
         onSelectProfile: () => setCurrentIndex(2),
         coreData: _coreData,
@@ -499,7 +499,6 @@ class _UpdateButtonState extends State<_UpdateButton> {
   }
 
   Future<void> _openAppStore() async {
-    
     final url = Uri.parse(
       'https://play.google.com/store/apps/details?id=${AppConfig.applicationId}',
     );

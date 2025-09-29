@@ -13,6 +13,7 @@ import 'package:rajakumari_scheme/core/services/auth_state_service.dart';
 import 'package:rajakumari_scheme/features/authentication/view/pages/login_with_phone_page.dart';
 import 'package:rajakumari_scheme/features/info/view/pages/policy_page.dart';
 import 'package:rajakumari_scheme/features/passbook/view/pages/passbook_page.dart';
+import 'package:rajakumari_scheme/features/profile/view/pages/edit_profile_page.dart';
 import 'package:rajakumari_scheme/features/profile/view/pages/profile_page.dart';
 
 class AppDrawerWidget extends StatefulWidget {
@@ -108,44 +109,48 @@ class _AppDrawerWidgetState extends State<AppDrawerWidget>
       animation: _animation,
       builder: (context, child) {
         return Transform.translate(
-          offset: Offset(-300 * (1 - _animation.value), 0), // -width to 0
+          offset: Offset(300 * (1 - _animation.value), 0), // -width to 0
           child: Drawer(
             width: 300,
             backgroundColor: Colors.transparent,
             elevation: 0,
-            child: Stack(
-              children: [
-                // Blurred background
-                Positioned.fill(
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(25),
-                      bottomLeft: Radius.circular(25),
-                    ),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(25),
-                            bottomLeft: Radius.circular(25),
+
+            child: Align(
+              alignment: AlignmentGeometry.centerRight,
+              child: Stack(
+                children: [
+                  // Blurred background
+                  Positioned.fill(
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(25),
+                        bottomLeft: Radius.circular(25),
+                      ),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.9),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              bottomLeft: Radius.circular(25),
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
 
-                // Content
-                Column(
-                  children: [
-                    _buildDrawerHeader(context),
-                    Expanded(child: _buildDrawerItems(context)),
-                    _buildFooter(context),
-                  ],
-                ),
-              ],
+                  // Content
+                  Column(
+                    children: [
+                      _buildDrawerHeader(context),
+                      Expanded(child: _buildDrawerItems(context)),
+                      _buildFooter(context),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -219,33 +224,70 @@ class _AppDrawerWidgetState extends State<AppDrawerWidget>
                   ),
                 ],
               ),
-              child: CircleAvatar(
-                radius: 35,
-                backgroundColor: Colors.white,
-                backgroundImage:
-                    _profileImage.isNotEmpty
-                        ? NetworkImage(
-                          "${ApiSecrets.imageBaseUrl}$_profileImage",
-                        )
-                        : null,
-                child:
-                    _profileImage.isEmpty
-                        ? const Icon(Icons.person, color: Colors.blue, size: 38)
-                        : null,
+              child: GestureDetector(
+                onTap: () async {
+                  Navigator.of(context).pop(); // Close drawer
+                  if (widget.onSelectProfile != null) {
+                    widget.onSelectProfile!();
+                  } else {
+                    final result = await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const ProfilePage(),
+                      ),
+                    );
+
+                    // Refresh auth state if profile was updated
+                    if (result == true) {
+                      _authStateService.checkAuthState();
+                    }
+                  }
+                },
+                child: CircleAvatar(
+                  radius: 35,
+                  backgroundColor: Colors.white,
+                  backgroundImage:
+                      _profileImage.isNotEmpty
+                          ? NetworkImage(
+                            "${ApiSecrets.imageBaseUrl}$_profileImage",
+                          )
+                          : null,
+                  child:
+                      _profileImage.isEmpty
+                          ? const Icon(
+                            Icons.person,
+                            color: Colors.blue,
+                            size: 38,
+                          )
+                          : null,
+                ),
               ),
             ),
           ),
         ),
         const SizedBox(width: 20),
         Expanded(
-          child: Text(
-            _userName.isNotEmpty ? _userName : 'User',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              fontSize: 22,
+          child: GestureDetector(
+            onTap: () async {
+              //  final result=
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const EditProfilePage(),
+                ),
+              );
+              // if (result == true) {
+              //   _loadUserData();
+              // }
+            },
+            child: Text(
+              _userName.isNotEmpty ? _userName : 'User',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 22,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
-            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
